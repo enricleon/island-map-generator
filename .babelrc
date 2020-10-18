@@ -1,0 +1,15 @@
+{
+  "presets": [
+    ["@babel/preset-env"],
+    ["@babel/preset-typescript"],
+    ["extendscript", { "loose": true, "modules": "System" }]
+  ],
+  "plugins": [
+    "@babel/plugin-proposal-class-properties",
+    "@babel/plugin-transform-arrow-functions",
+    ["@babel/plugin-transform-modules-commonjs", {
+      "loose": true,
+      "allowTopLevelThis": true
+    }]
+  ]
+}
