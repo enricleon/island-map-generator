@@ -1,60 +1,88 @@
 import SelectionHelper from '../helpers/selection-helper';
+import { TileRandomizer } from './tile-randomizer';
 
 export class MapGenerator {
   private _basePath: string;
-  private _document: Document;
+  private _height: number;
+  private _width: number;
+  private _ppi: number;
+  private _gridSize: number;
+  private _gapSize: number;
+
+  private _tileRandomizer: TileRandomizer;
 
   constructor (options) {
-    this._basePath = (new File($.fileName)).path;
-
     this._init(options);
   }
 
   _init({
     width,
     height,
-    ppi,
-    docName
+    gridSize,
+    gapSize,
+    ppi
   }) {
-    app.documents.add(width, height, ppi, docName, NewDocumentMode.RGB);
-    this._document = app.activeDocument;
+    this._basePath = (new File($.fileName)).path;
+
+    this._width = width;
+    this._height = height;
+    this._ppi = ppi;
+    this._gridSize = gridSize;
+    this._gapSize = gapSize;
+
+    this._tileRandomizer = new TileRandomizer(this._gridSize);
   }
 
-  drawGrid(gridSize: number, gapSize: number) {
-    const width = this._document.width as number;
-    const size = width - (gapSize * (gridSize - 1));
+  generateTile(name: string) {
+    const result = this._tileRandomizer.getRandomTile();
 
-    const squareSize = size / gridSize;
+    app.documents.add(this._width, this._height, this._ppi, name, NewDocumentMode.RGB);
+    const document = app.activeDocument;
 
-    for (var x = 0; x < gridSize; x = x + 1) {
-      for (var y = 0; y < gridSize; y = y + 1) {
+    const width = document.width as number;
+    const size = width - (this._gapSize * (this._gridSize - 1));
+
+    const squareSize = size / this._gridSize;
+
+    for (var x = 0; x < this._gridSize; x = x + 1) {
+      for (var y = 0; y < this._gridSize; y = y + 1) {
+        const tileType = result[y * this._gridSize + x];
         // Add a new layer
-        this._document.artLayers.add();
+        document.artLayers.add();
 
         var startX = x * squareSize;
         var startY = y * squareSize;
 
         if (x > 0) {
-          startX = startX + x * gapSize;
+          startX = startX + x * this._gapSize;
         }
 
         if (y > 0) {
-          startY = startY + y * gapSize;
+          startY = startY + y * this._gapSize;
         }
 
         SelectionHelper.makeSelection(startX, startY, squareSize, squareSize)
 
-        var fillColor = new RGBColor()
-        fillColor.red = 44
-        fillColor.green = 118
-        fillColor.blue = 255
-
-        this._document.selection.fill(fillColor)
+        document.selection.fill(tileType)
       }
     }
 
     // Saving the file
-    const file = File(this._basePath + '/result.psd')
-    this._document.saveAs(file)
+
+    this._saveAndClose(document, `${this._basePath}/${name}.jpg`)
+  }
+
+  _saveAndClose(document, saveFile, jpegQuality = 7) {
+    saveFile = (saveFile instanceof File) ? saveFile : new File(saveFile);
+    
+    const jpgSaveOptions = new JPEGSaveOptions();
+    jpgSaveOptions.embedColorProfile = true;
+    jpgSaveOptions.formatOptions = FormatOptions.STANDARDBASELINE;
+    jpgSaveOptions.matte = MatteType.NONE;
+    jpgSaveOptions.quality = jpegQuality;
+
+    app.displayDialogs = DialogModes.NO;
+    document.saveAs(saveFile, jpgSaveOptions, true, Extension.LOWERCASE);
+    document.close(SaveOptions.DONOTSAVECHANGES);
   }
 }

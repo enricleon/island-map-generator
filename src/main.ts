@@ -6,10 +6,13 @@ function main () {
     width: 710,
     height: 710,
     ppi: 300,
-    name: 'map-tile'
+    gridSize: 3,
+    gapSize: 1
   });
-  
-  generator.drawGrid(3, 1);
+
+  for(var i = 0; i < 48; i++) {
+    generator.generateTile(`map-tile-${i + 1}`);
+  }
 }
 
 main();
