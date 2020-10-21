@@ -15,7 +15,13 @@
     "outDir": "dist",
     "allowJs": true,
     "strictNullChecks": true,
-    "noLib": true,
+    // "noLib": true,
+    "target": "esnext",
+    "lib": [
+      "es2017",
+      "esnext.array",
+      "dom"
+    ],
     "types": [
       // Once you've run `npm init -y`, `npm install pravdomil/types-for-adobe` in terminal
       // targeting your directory, paths to supported apps will be node_modules/...

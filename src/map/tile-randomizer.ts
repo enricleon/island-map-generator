@@ -1,115 +1,154 @@
+import TERRAIN_COLORS from '../constants/colors';
+import { TerrainType } from '../enums/terrain-type';
 import ArrayHelper from '../helpers/array-helper';
+import { Rate } from '../models/Rate'
 
-const RATES = {
-  terrain: {
-    rate: 0.3,
-    spread: 0.75
-  },
-  bonus: {
-    rate: 0.6,
-    spread: 1,
-    min: 1
-  },
-  treaseures: {
-    rate: 0.5,
-    spread: 1
-  }
-}
+const CONTENT_TREE = new Rate({
+  value: 0.35,
+  spread: 0.6,
+  type: TerrainType.Terrain,
+  contains: [
+    new Rate({
+      value: 1,
+      spread: 0.3,
+      transparent: true,
+      type: TerrainType.Bonus,
+      min: 1,
+      contains: [
+        new Rate({
+          value: 0.3,
+          spread: 0.35,
+          type: TerrainType.Tabern,
+        }),
+        new Rate({
+          value: 0.4,
+          spread: 0.4,
+          type: TerrainType.Treasure,
+        }),
+        new Rate({
+          value: 0.4,
+          spread: 0.2,
+          type: TerrainType.Port,
+        }),
+      ],
+    }),
+  ],
+})
 
 export class TileRandomizer {
-  private _gridSize: number;
+  private _gridSize: number
+  private _contentTree = CONTENT_TREE;
 
-  constructor (gridSize) {
-    this._gridSize = gridSize;
+  constructor(gridSize) {
+    this._gridSize = gridSize
   }
 
   getRandomTile() {
-    const totalSpaces = this._gridSize * this._gridSize;
-    const terrainSpaces = this._getNumOfTerrainSpaces(totalSpaces);
-    const bonusSpaces = this._getNumOfBonusTiles(terrainSpaces);
-    const treasureSpaces = this._getNumOfTreasures(bonusSpaces);
-    const villageSpaces = this._getNumOfVillages(bonusSpaces, treasureSpaces);
-
-    const water = totalSpaces - terrainSpaces;
-
-    const result:RGBColor[] = [];
-    for (var i = 0; i < (terrainSpaces - bonusSpaces); i++) {
-      var fillColor = new RGBColor()
-      fillColor.red = 249
-      fillColor.green = 236
-      fillColor.blue = 195
-
-      result.push(fillColor);
-    }
-
-    for (var i = 0; i < treasureSpaces; i++) {
-      var fillColor = new RGBColor()
-      fillColor.red = 163
-      fillColor.green = 78
-      fillColor.blue = 24
-
-      result.push(fillColor);
-    }
-
-    for (var i = 0; i < villageSpaces; i++) {
-      var fillColor = new RGBColor()
-      fillColor.red = 229
-      fillColor.green = 205
-      fillColor.blue = 165
-
-      result.push(fillColor);
-    }
+    const totalSpaces = this._gridSize * this._gridSize
+    const result = this._processContentTree(totalSpaces, this._contentTree);
+    const types = this._extractColorsFromTree(result);
+    const water = totalSpaces - types.length;
 
     for (var i = 0; i < water; i++) {
-      var fillColor = new RGBColor()
-      fillColor.red = 34
-      fillColor.green = 108
-      fillColor.blue = 168
-
-      result.push(fillColor);
+      types.push(TerrainType.Water);
     }
 
-    ArrayHelper.shuffleArray(result);
+    ArrayHelper.shuffleArray(types)
 
-    return result;
+    // return result;
+    return types.map(type => TERRAIN_COLORS[type]);
   }
 
-  _getNumOfTerrainSpaces(tileSpaces: number) {
-    const terrainRate = RATES.terrain.rate;
-    const spread = RATES.terrain.spread;
-    const modifier = terrainRate * spread;
+  _processContentTree(totalSpaces, rate: Rate, min = 0) {
+    const spaces = Math.max(min, this._getNumOfSpaces(totalSpaces, rate));
 
-    const max = terrainRate + modifier;
-    const min = terrainRate - modifier;
+    const acc = [];
 
-    return Math.floor(tileSpaces * (Math.random() * (max - min) + min));
+    for(var i = 0; i < rate.contains.length; i++) {
+      const child = rate.contains[i];
+
+      let occupiedSpaces = 0;
+
+      for(var j = 0; j < acc.length; j++) {
+        occupiedSpaces = occupiedSpaces + acc[j].spaces;
+      }
+
+      const availableSpaces = i - 1 >= 0 ? 
+          spaces - occupiedSpaces : 
+          spaces;
+
+      const isLast = (i === rate.contains.length - 1)
+      const min = isLast && occupiedSpaces < rate.min ? rate.min - occupiedSpaces : 0;
+
+      const returnValue = this._processContentTree(
+        availableSpaces, 
+        child, 
+        min
+      );
+
+      acc.push(returnValue);
+    }
+
+    return {
+      rate: rate.name,
+      spaces: spaces,
+      type: rate.type,
+      transparent: rate.transparent,
+      contains: acc
+    }
   }
 
-  _getNumOfBonusTiles(terrainSpaces: number) {
-    const bonusSpaces = RATES.bonus.rate;
-    const spread = RATES.bonus.spread;
-    const modifier = bonusSpaces * spread;
-    const terrainMin = Math.min(RATES.bonus.min, terrainSpaces);
+  _extractColorsFromTree(node) {
+    if(!node.contains || node.contains.length === 0) {
+      const spaces = new Array(node.spaces);
+      return spaces.map(() => node.type);
+    } else {
+      let contains = [];
 
-    const max = bonusSpaces + modifier;
-    const min = bonusSpaces - modifier;
+      for(var i = 0; i < node.contains.length; i++) {
+        let childNode = node.contains[i];
+        const type = this._extractColorsFromTree(childNode);
 
-    const bonus = Math.floor(terrainSpaces * (Math.random() * (max - min) + min));
-    return bonus < terrainMin ? terrainMin : bonus;
+        contains = contains.concat(type);
+      }
+
+      if(!node.transparent) {
+        const spaces = new Array(node.spaces - contains.length);
+        spaces.forEach(() => {
+          contains.push(node.type);
+        });
+      }
+
+      return contains;
+    }
   }
 
-  _getNumOfTreasures(bonusSpaces: number) {
-    const treasureSpaces = RATES.treaseures.rate;
-    const spread = RATES.treaseures.spread;
-    const modifier = treasureSpaces * spread;
+  _getNumOfSpaces(availableSpaces, rate: Rate) {
+    const minMax = this._getMinMax(rate);
 
-    const max = treasureSpaces + modifier;
-    const min = treasureSpaces - modifier;
+    const spaces = this._getRandomValueFromRange(
+      availableSpaces,
+      minMax
+    )
 
-    return Math.floor(bonusSpaces * (Math.random() * (max - min) + min));
+    const availableMin =
+      rate.min !== undefined
+        ? Math.min(rate.min, availableSpaces)
+        : 0;
+
+    return spaces < availableMin ? availableMin : spaces
   }
-  
-  _getNumOfVillages(bonusSpaces: number, treasureSpaces: number) {
-    return bonusSpaces - treasureSpaces;
+
+  _getMinMax(rate: Rate) {
+    const modifier = rate.value * rate.spread
+
+    const max = rate.value + modifier
+    const min = rate.value - modifier
+
+    return { min, max }
+  }
+
+  _getRandomValueFromRange(availableSpaces, { min, max }) {
+    return Math.floor(availableSpaces * (Math.random() * (max - min) + min))
   }
 }

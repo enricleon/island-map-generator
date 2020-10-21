@@ -9,8 +9,6 @@ export class MapGenerator {
   private _gridSize: number;
   private _gapSize: number;
 
-  private _tileRandomizer: TileRandomizer;
-
   constructor (options) {
     this._init(options);
   }
@@ -29,13 +27,9 @@ export class MapGenerator {
     this._ppi = ppi;
     this._gridSize = gridSize;
     this._gapSize = gapSize;
-
-    this._tileRandomizer = new TileRandomizer(this._gridSize);
   }
 
-  generateTile(name: string) {
-    const result = this._tileRandomizer.getRandomTile();
-
+  generateTile(name: string, tile: []) {
     app.documents.add(this._width, this._height, this._ppi, name, NewDocumentMode.RGB);
     const document = app.activeDocument;
 
@@ -46,7 +40,7 @@ export class MapGenerator {
 
     for (var x = 0; x < this._gridSize; x = x + 1) {
       for (var y = 0; y < this._gridSize; y = y + 1) {
-        const tileType = result[y * this._gridSize + x];
+        const tileType = tile[y * this._gridSize + x];
         // Add a new layer
         document.artLayers.add();
 
