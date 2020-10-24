@@ -2,34 +2,44 @@ import TERRAIN_COLORS from '../constants/colors';
 import { TerrainType } from '../enums/terrain-type';
 import ArrayHelper from '../helpers/array-helper';
 import { Rate } from '../models/Rate'
+import { SpaceNode } from '../models/SpaceNode';
 
 const CONTENT_TREE = new Rate({
-  value: 0.35,
-  spread: 0.6,
+  value: 0.75,
+  spread: 0.25,
   type: TerrainType.Terrain,
+  min: 1,
   contains: [
     new Rate({
-      value: 1,
-      spread: 0.3,
+      value: 0.75,
+      spread: 0.5,
       transparent: true,
       type: TerrainType.Bonus,
       min: 1,
       contains: [
         new Rate({
-          value: 0.3,
-          spread: 0.35,
-          type: TerrainType.Tabern,
+          value: 0.5,
+          spread: 0.25,
+          transparent: true,
+          type: TerrainType.TerrainBonus,
+          contains: [
+            new Rate({
+              value: 0.5,
+              spread: 0.25,
+              type: TerrainType.Tabern,
+            }),
+            new Rate({
+              value: 0.5,
+              spread: 0.25,
+              type: TerrainType.Port,
+            }),
+          ]
         }),
         new Rate({
-          value: 0.4,
-          spread: 0.4,
-          type: TerrainType.Treasure,
-        }),
-        new Rate({
-          value: 0.4,
+          value: 0.5,
           spread: 0.2,
-          type: TerrainType.Port,
-        }),
+          type: TerrainType.Treasure,
+        })
       ],
     }),
   ],
@@ -43,10 +53,11 @@ export class TileRandomizer {
     this._gridSize = gridSize
   }
 
-  getRandomTile() {
+  getRandomTile(): TerrainType[] {
     const totalSpaces = this._gridSize * this._gridSize
     const result = this._processContentTree(totalSpaces, this._contentTree);
     const types = this._extractColorsFromTree(result);
+
     const water = totalSpaces - types.length;
 
     for (var i = 0; i < water; i++) {
@@ -59,25 +70,17 @@ export class TileRandomizer {
     return types.map(type => TERRAIN_COLORS[type]);
   }
 
-  _processContentTree(totalSpaces, rate: Rate, min = 0) {
+  _processContentTree(totalSpaces, rate: Rate, min = 0): SpaceNode {
     const spaces = Math.max(min, this._getNumOfSpaces(totalSpaces, rate));
 
-    const acc = [];
+    const contentTree = rate.contains.reduce((nodes: SpaceNode[], child: Rate, index) => {
+      let occupiedSpaces = nodes.reduce((sum, node) => sum + node.spaces, 0);
 
-    for(var i = 0; i < rate.contains.length; i++) {
-      const child = rate.contains[i];
-
-      let occupiedSpaces = 0;
-
-      for(var j = 0; j < acc.length; j++) {
-        occupiedSpaces = occupiedSpaces + acc[j].spaces;
-      }
-
-      const availableSpaces = i - 1 >= 0 ? 
+      const availableSpaces = index - 1 >= 0 ? 
           spaces - occupiedSpaces : 
           spaces;
 
-      const isLast = (i === rate.contains.length - 1)
+      const isLast = (index === rate.contains.length - 1)
       const min = isLast && occupiedSpaces < rate.min ? rate.min - occupiedSpaces : 0;
 
       const returnValue = this._processContentTree(
@@ -86,31 +89,29 @@ export class TileRandomizer {
         min
       );
 
-      acc.push(returnValue);
-    }
+      alert(`
+        ${TerrainType[returnValue.type].toString()}: ${returnValue.spaces}
+      `);
 
-    return {
-      rate: rate.name,
+      nodes.push(returnValue);
+
+      return nodes;
+    }, []);
+
+    return new SpaceNode({
       spaces: spaces,
       type: rate.type,
       transparent: rate.transparent,
-      contains: acc
-    }
+      contains: contentTree
+    });
   }
 
-  _extractColorsFromTree(node) {
+  _extractColorsFromTree(node: SpaceNode): TerrainType[] {
     if(!node.contains || node.contains.length === 0) {
-      const spaces = new Array(node.spaces);
-      return spaces.map(() => node.type);
+      return [...new Array(node.spaces)].map(() => node.type);
     } else {
-      let contains = [];
-
-      for(var i = 0; i < node.contains.length; i++) {
-        let childNode = node.contains[i];
-        const type = this._extractColorsFromTree(childNode);
-
-        contains = contains.concat(type);
-      }
+      let contains = node.contains
+        .reduce((acc, childNode) => [...acc, ...this._extractColorsFromTree(childNode)], []);
 
       if(!node.transparent) {
         const spaces = new Array(node.spaces - contains.length);

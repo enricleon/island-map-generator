@@ -1,18 +1,27 @@
 {
-  "name": "pirate-game-ts",
+  "name": "island-tile-generator",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Islands Tile Generator",
+  "main": "main.ts",
+  "watch": {
+    "build": {
+      "patterns": ["."],
+      "extensions": "ts",
+      "quiet": false
+    }
+  },
   "scripts": {
-    "build": "webpack",
+    "dev": "npm-watch",
+    "build": "webpack && npm run build:extendscript",
     "build:watch": "webpack --watch",
+    "build:extendscript": "extendscriptr --script dist/island-tile-generator.js --output dist/island-tile-generator.jsx --target Photoshop --targetengine main",
+    "clean": "rimraf dist/island-tile-generator.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "extendscript-es5-shim-ts": "0.0.1",
     "types-for-adobe": "^6.0.1"
   },
   "devDependencies": {
@@ -22,13 +31,17 @@
     "@babel/plugin-transform-arrow-functions": "^7.12.1",
     "@babel/plugin-transform-classes": "^7.12.1",
     "@babel/plugin-transform-modules-commonjs": "^7.12.1",
+    "@babel/plugin-transform-new-target": "^7.12.1",
+    "@babel/plugin-transform-object-assign": "^7.12.1",
     "@babel/plugin-transform-runtime": "^7.12.1",
     "@babel/plugin-transform-typescript": "^7.12.1",
     "@babel/preset-env": "^7.12.1",
     "@babel/preset-typescript": "^7.12.1",
     "babel-loader": "^8.1.0",
-    "babel-preset-extendscript": "^1.0.2",
+    "extendscriptr": "^1.2.6",
+    "rimraf": "^3.0.2",
     "typescript": "^4.0.3",
+    "watch": "^1.0.2",
     "webpack-cli": "^4.0.0",
     "webpack-node-externals": "^2.5.2"
   }

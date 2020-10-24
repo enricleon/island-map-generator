@@ -7,17 +7,17 @@
         {
             "type": "extendscript-debug",
             "request": "launch",
-            "name": "Map generator debug",
-            "program": "${workspaceFolder}/dist/index.jsx",
+            "name": "Debug",
+            "program": "${workspaceFolder}/dist/island-tile-generator.jsx",
             "stopOnEntry": false
         },
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
+            "name": "Launch",
             "program": "${workspaceFolder}/src/main.ts",
             "preLaunchTask": "npm: build",
-            "outFiles": ["${workspaceFolder}/dist/index.jsx"]
+            "outFiles": ["${workspaceFolder}/dist/island-tile-generator.jsx"]
         }
     ]
 }

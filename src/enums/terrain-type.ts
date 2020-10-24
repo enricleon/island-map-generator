@@ -5,5 +5,7 @@ export enum TerrainType {
   Port,
   Treasure,
   Tabern,
-  Water
+  Water,
+  TerrainBonus,
+  NewTerrain
 }

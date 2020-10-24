@@ -1,7 +1,8 @@
+ /// <reference types="types-for-adobe/Photoshop/2015.5" />
+ import { TerrainType } from '../enums/terrain-type';
 import SelectionHelper from '../helpers/selection-helper';
-import { TileRandomizer } from './tile-randomizer';
 
-export class MapGenerator {
+export class TileGenerator {
   private _basePath: string;
   private _height: number;
   private _width: number;
@@ -29,7 +30,7 @@ export class MapGenerator {
     this._gapSize = gapSize;
   }
 
-  generateTile(name: string, tile: []) {
+  generateTile(name: string, tile: TerrainType[]) {
     app.documents.add(this._width, this._height, this._ppi, name, NewDocumentMode.RGB);
     const document = app.activeDocument;
 

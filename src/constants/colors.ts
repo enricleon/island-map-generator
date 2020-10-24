@@ -20,10 +20,10 @@ terrain.red = 249;
 terrain.green = 236;
 terrain.blue = 195;
 
-var water = new RGBColor()
-water.red = 34
-water.green = 108
-water.blue = 168
+var water = new RGBColor();
+water.red = 34;
+water.green = 108;
+water.blue = 168;
 
 const TERRAIN_COLORS = {};
 

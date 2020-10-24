@@ -3,15 +3,15 @@ const nodeExternals = require('webpack-node-externals')
 module.exports = {
   entry: './src/main.ts',
   output: {
-    filename: 'index.jsx', // <-- Important
+    filename: 'island-tile-generator.js', // <-- Important
     libraryTarget: 'this', // <-- Important
   },
-  target: 'es3', // <-- Important
+  target: 'es6', // <-- Important
   module: {
     rules: [
       {
         test: /\.(js|jsx|tsx|ts)$/,
-        exclude: /node_modules/,
+        exclude: [/node_modules/, /core-js/, /regenerator-runtime/],
         loader: 'babel-loader',
       },
     ],

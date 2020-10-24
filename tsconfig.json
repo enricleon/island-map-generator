@@ -18,11 +18,11 @@
     // "noLib": true,
     "target": "esnext",
     "lib": [
-      "es2017",
-      "esnext.array",
-      "dom"
+      "esnext",
+      "ScriptHost"
     ],
     "types": [
+      // "./node_modules/photoshop.d.ts/dist/cc",
       // Once you've run `npm init -y`, `npm install pravdomil/types-for-adobe` in terminal
       // targeting your directory, paths to supported apps will be node_modules/...
       //

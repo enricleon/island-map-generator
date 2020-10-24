@@ -1,13 +1,16 @@
 {
-	"version": "2.0.0",
+  "version": "2.0.0",
 	"tasks": [
     {
       "type": "npm",
       "script": "build",
       "group": "build",
+      "presentation": {
+        "reveal": "always"
+      },
       "problemMatcher": [],
-      "label": "npm: build",
-      "detail": "webpack"
+      "label": "Build Photoshop Script",
+      "detail": "Generate dist/island-tile-generator.jsx script to send to the adobe extendscript process"
     }
   ]
 }
