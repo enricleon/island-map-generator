@@ -1,127 +1,165 @@
 import TERRAIN_COLORS from '../constants/colors';
 import { TerrainType } from '../enums/terrain-type';
 import ArrayHelper from '../helpers/array-helper';
+import RandomHelper from '../helpers/random-helper';
 import { Rate } from '../models/Rate'
 import { SpaceNode } from '../models/SpaceNode';
 
 const CONTENT_TREE = new Rate({
-  value: 0.75,
-  spread: 0.25,
-  type: TerrainType.Terrain,
-  min: 1,
+  value: 1,
+  spread: 0,
+  type: TerrainType.Water,
   contains: [
     new Rate({
-      value: 0.75,
-      spread: 0.5,
-      transparent: true,
-      type: TerrainType.Bonus,
-      min: 1,
-      contains: [
-        new Rate({
-          value: 0.5,
-          spread: 0.25,
-          transparent: true,
-          type: TerrainType.TerrainBonus,
-          contains: [
-            new Rate({
-              value: 0.5,
-              spread: 0.25,
-              type: TerrainType.Tabern,
-            }),
-            new Rate({
-              value: 0.5,
-              spread: 0.25,
-              type: TerrainType.Port,
-            }),
-          ]
-        }),
-        new Rate({
-          value: 0.5,
-          spread: 0.2,
-          type: TerrainType.Treasure,
-        })
-      ],
-    }),
-  ],
-})
+    value: 0.3,
+    spread: 0,
+    type: TerrainType.Terrain,
+    max: 4,
+    contains: [
+      new Rate({
+        value: 0.6,
+        spread: 0,
+        excludeSelf: true,
+        min: 1,
+        max: 2,
+        type: TerrainType.Bonus,
+        contains: [
+          new Rate({
+            value: 0.6,
+            spread: 0,
+            max: 1,
+            excludeSelf: true,
+            type: TerrainType.TerrainBonus,
+            contains: [
+              new Rate({
+                value: 0.5,
+                spread: 0,
+                type: TerrainType.Tabern,
+              }),
+              new Rate({
+                value: 0.5,
+                spread: 0,
+                type: TerrainType.Treasure,
+              })
+            ]
+          }),
+          new Rate({
+            value: 0.4,
+            spread: 0,
+            type: TerrainType.Port,
+          }),
+        ],
+      }),
+    ],
+  })
+]});
 
 export class TileRandomizer {
   private _gridSize: number
   private _contentTree = CONTENT_TREE;
+  private _log: string[];
+  private _logEnabled: boolean;
 
-  constructor(gridSize) {
+  constructor(gridSize, enableLog?) {
     this._gridSize = gridSize
+    this._log = [];
+    this._logEnabled = enableLog;
   }
 
   getRandomTile(): TerrainType[] {
+    this._log = [];
     const totalSpaces = this._gridSize * this._gridSize
     const result = this._processContentTree(totalSpaces, this._contentTree);
     const types = this._extractColorsFromTree(result);
 
-    const water = totalSpaces - types.length;
+    ArrayHelper.shuffleArray(types);
 
-    for (var i = 0; i < water; i++) {
-      types.push(TerrainType.Water);
+    // this._log.push(JSON.stringify(types));
+
+    if(this._log.length && this._logEnabled) {
+      alert(this._log.join('\n'));
     }
 
-    ArrayHelper.shuffleArray(types)
-
     // return result;
-    return types.map(type => TERRAIN_COLORS[type]);
+    return types;
   }
 
-  _processContentTree(totalSpaces, rate: Rate, min = 0): SpaceNode {
-    const spaces = Math.max(min, this._getNumOfSpaces(totalSpaces, rate));
+  _processContentTree(spaces, rate: Rate): SpaceNode {
+    let contains = new Array<SpaceNode>();
+    const ratesIncluded = rate.excludeSelf ? rate.contains : 
+      [rate, ...rate.contains];
 
-    const contentTree = rate.contains.reduce((nodes: SpaceNode[], child: Rate, index) => {
-      let occupiedSpaces = nodes.reduce((sum, node) => sum + node.spaces, 0);
+    // from the available spaces, of much are for childs?
+    const results = ratesIncluded.reduce((distribution, rateIncluded) => {
+      distribution[rateIncluded.type] = 0;
+      return distribution;
+    }, {});
 
-      const availableSpaces = index - 1 >= 0 ? 
-          spaces - occupiedSpaces : 
-          spaces;
+    const childsProbability = rate.contains.reduce((sum, child) => sum + child.value, 0);
+    const ownProbability = rate.value - (childsProbability * rate.value);
 
-      const isLast = (index === rate.contains.length - 1)
-      const min = isLast && occupiedSpaces < rate.min ? rate.min - occupiedSpaces : 0;
+    let alreadyOccupiedNumSpaces = 0;
+    
+    rate.contains
+      .filter(child => child.min !== undefined && child.min > 0)
+      .forEach(child => {
+        if((alreadyOccupiedNumSpaces + child.min) <= spaces) {
+          alreadyOccupiedNumSpaces += child.min;
+          results[child.type] += child.min;
+        }
+      });
 
-      const returnValue = this._processContentTree(
-        availableSpaces, 
-        child, 
-        min
+    for(var i = 0; i < spaces - alreadyOccupiedNumSpaces; i++) {
+      const options = rate.contains.filter(option => option.max === undefined || results[option.type] < option.max);
+      const args = [{ value: ownProbability, type: rate.type }, ...options];
+      const randomSpace = RandomHelper.getRandom<{ value: number, type: TerrainType }>(args, this._log);
+
+      results[randomSpace.type]++;
+    }
+
+    // this._log.push(`Space ${i}: ${JSON.stringify(results)}`);
+
+    contains = rate.contains.map((child) => {
+      const numSpaces = results[child.type];
+      
+      return this._processContentTree(
+        numSpaces,
+        child
       );
-
-      alert(`
-        ${TerrainType[returnValue.type].toString()}: ${returnValue.spaces}
-      `);
-
-      nodes.push(returnValue);
-
-      return nodes;
-    }, []);
+    });
 
     return new SpaceNode({
       spaces: spaces,
       type: rate.type,
-      transparent: rate.transparent,
-      contains: contentTree
+      excludeSelf: rate.excludeSelf,
+      contains: contains
     });
   }
 
   _extractColorsFromTree(node: SpaceNode): TerrainType[] {
-    if(!node.contains || node.contains.length === 0) {
-      return [...new Array(node.spaces)].map(() => node.type);
-    } else {
-      let contains = node.contains
-        .reduce((acc, childNode) => [...acc, ...this._extractColorsFromTree(childNode)], []);
+    const childTypes = [...new Array<TerrainType>()];
 
-      if(!node.transparent) {
-        const spaces = new Array(node.spaces - contains.length);
-        spaces.forEach(() => {
-          contains.push(node.type);
-        });
-      }
-
-      return contains;
+    for(var i = 0; i < node.contains.length; i++) {
+      childTypes.push(...this._extractColorsFromTree(node.contains[i]));
     }
+
+    let ownTypesArray = new Array();
+
+    try {
+      ownTypesArray = [...new Array(node.spaces - childTypes.length)];
+    } catch {
+      alert(`
+        Spaces: ${node.spaces}, Childs: ${childTypes.length}\n
+        This is the node:\n
+        ${JSON.stringify(node)}
+      `);
+    }
+
+    const ownTypes = ownTypesArray.map(nothing => node.type);
+
+    return node.excludeSelf ?
+      childTypes :
+      [...ownTypes, ...childTypes];
   }
 
   _getNumOfSpaces(availableSpaces, rate: Rate) {

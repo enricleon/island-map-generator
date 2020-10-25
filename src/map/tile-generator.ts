@@ -1,5 +1,7 @@
  /// <reference types="types-for-adobe/Photoshop/2015.5" />
- import { TerrainType } from '../enums/terrain-type';
+ import TERRAIN_ASSETS from '../constants/assets';
+import TERRAIN_COLORS from '../constants/colors';
+import { TerrainType } from '../enums/terrain-type';
 import SelectionHelper from '../helpers/selection-helper';
 
 export class TileGenerator {
@@ -30,7 +32,7 @@ export class TileGenerator {
     this._gapSize = gapSize;
   }
 
-  generateTile(name: string, tile: TerrainType[]) {
+  generateTile(name: string, terrains: TerrainType[]) {
     app.documents.add(this._width, this._height, this._ppi, name, NewDocumentMode.RGB);
     const document = app.activeDocument;
 
@@ -41,7 +43,8 @@ export class TileGenerator {
 
     for (var x = 0; x < this._gridSize; x = x + 1) {
       for (var y = 0; y < this._gridSize; y = y + 1) {
-        const tileType = tile[y * this._gridSize + x];
+        const tileType = terrains[y * this._gridSize + x];
+        const color = TERRAIN_COLORS[tileType];
         // Add a new layer
         document.artLayers.add();
 
@@ -58,13 +61,41 @@ export class TileGenerator {
 
         SelectionHelper.makeSelection(startX, startY, squareSize, squareSize)
 
-        document.selection.fill(tileType)
+        document.selection.fill(color);
+
+        if(TERRAIN_ASSETS[tileType]) {
+          this._addBonus(
+            document, 
+            TERRAIN_ASSETS[tileType], 
+            squareSize
+          );
+        }
       }
     }
 
     // Saving the file
 
     this._saveAndClose(document, `${this._basePath}/${name}.jpg`)
+  }
+
+  _addBonus(document, fileName, squareSize) {
+    const file = new File(`${this._basePath}/../assets/${fileName}`)
+
+    const assetDocument = app.open(file);
+    const assetWidth = (assetDocument.width as UnitValue).value;
+    const widthRelation = (squareSize * 0.8 * 100) / assetWidth;
+    
+    assetDocument.selection.selectAll();
+    assetDocument.selection.copy();
+    const assetLayer = assetDocument.paste(true);
+
+    assetLayer.resize(widthRelation, widthRelation, AnchorPosition.MIDDLECENTER);
+    assetDocument.selection.selectAll();
+    assetDocument.selection.copy();
+    assetDocument.close(SaveOptions.DONOTSAVECHANGES);
+
+    app.activeDocument = document;
+    app.activeDocument.paste(true);
   }
 
   _saveAndClose(document, saveFile, jpegQuality = 7) {

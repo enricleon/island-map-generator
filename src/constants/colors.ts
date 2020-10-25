@@ -27,9 +27,9 @@ water.blue = 168;
 
 const TERRAIN_COLORS = {};
 
-TERRAIN_COLORS[TerrainType.Port] = port;
-TERRAIN_COLORS[TerrainType.Tabern] = tabern;
-TERRAIN_COLORS[TerrainType.Treasure] = treasure;
+TERRAIN_COLORS[TerrainType.Port] = terrain;
+TERRAIN_COLORS[TerrainType.Tabern] = terrain;
+TERRAIN_COLORS[TerrainType.Treasure] = terrain;
 TERRAIN_COLORS[TerrainType.Terrain] = terrain;
 TERRAIN_COLORS[TerrainType.Water] = water;
 
