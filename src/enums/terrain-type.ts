@@ -7,5 +7,9 @@ export enum TerrainType {
   Tabern,
   Water,
   TerrainBonus,
-  NewTerrain
+  NewTerrain,
+  Cocinero,
+  Vigia,
+  Navegante,
+  Artillero
 }

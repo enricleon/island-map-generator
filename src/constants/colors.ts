@@ -17,12 +17,12 @@ treasure.blue = 3;
 
 var terrain = new RGBColor();
 terrain.red = 249;
-terrain.green = 236;
-terrain.blue = 195;
+terrain.green = 227;
+terrain.blue = 154;
 
 var water = new RGBColor();
-water.red = 34;
-water.green = 108;
+water.red = 59;
+water.green = 138;
 water.blue = 168;
 
 const TERRAIN_COLORS = {};
@@ -32,5 +32,9 @@ TERRAIN_COLORS[TerrainType.Tabern] = terrain;
 TERRAIN_COLORS[TerrainType.Treasure] = terrain;
 TERRAIN_COLORS[TerrainType.Terrain] = terrain;
 TERRAIN_COLORS[TerrainType.Water] = water;
+TERRAIN_COLORS[TerrainType.Cocinero] = terrain;
+TERRAIN_COLORS[TerrainType.Vigia] = terrain;
+TERRAIN_COLORS[TerrainType.Navegante] = terrain;
+TERRAIN_COLORS[TerrainType.Artillero] = terrain;
 
 export default TERRAIN_COLORS;

@@ -1,16 +1,16 @@
 import { TerrainType } from '../enums/terrain-type';
+import { Rate } from './Rate';
 
-export class Rate {
+export class PortRate extends Rate {
   public excludeSelf: boolean;
   public value: number;
-  public type: TerrainType;
   public min: number;
   public max: number;
   public contains: Rate[];
 
-  public constructor(init?:Partial<Rate>) {
-    this.contains = new Array<Rate>();
+  public constructor(init?:Partial<PortRate>) {
+    super(init);
 
-    Object.assign(this, init);
+    this.type = TerrainType.Port;
   }
 }

@@ -2,51 +2,64 @@ import TERRAIN_COLORS from '../constants/colors';
 import { TerrainType } from '../enums/terrain-type';
 import ArrayHelper from '../helpers/array-helper';
 import RandomHelper from '../helpers/random-helper';
+import { PortRate } from '../models/PortRate';
 import { Rate } from '../models/Rate'
 import { SpaceNode } from '../models/SpaceNode';
 
 const CONTENT_TREE = new Rate({
   value: 1,
-  spread: 0,
   type: TerrainType.Water,
   contains: [
     new Rate({
-    value: 0.3,
-    spread: 0,
+    value: 0.31,
     type: TerrainType.Terrain,
-    max: 4,
+    min: 1,
+    max: 3,
     contains: [
       new Rate({
-        value: 0.6,
-        spread: 0,
+        value: 0.62,
         excludeSelf: true,
         min: 1,
         max: 2,
         type: TerrainType.Bonus,
         contains: [
           new Rate({
-            value: 0.6,
-            spread: 0,
+            value: 0.62,
             max: 1,
             excludeSelf: true,
             type: TerrainType.TerrainBonus,
             contains: [
               new Rate({
                 value: 0.5,
-                spread: 0,
                 type: TerrainType.Tabern,
+                excludeSelf: true,
+                contains: [
+                  new Rate({
+                    value: 0.25,
+                    type: TerrainType.Cocinero,
+                  }),
+                  new Rate({
+                    value: 0.25,
+                    type: TerrainType.Vigia,
+                  }),
+                  new Rate({
+                    value: 0.25,
+                    type: TerrainType.Navegante,
+                  }),
+                  new Rate({
+                    value: 0.25,
+                    type: TerrainType.Artillero,
+                  }),
+                ]
               }),
               new Rate({
                 value: 0.5,
-                spread: 0,
                 type: TerrainType.Treasure,
               })
             ]
           }),
-          new Rate({
-            value: 0.4,
-            spread: 0,
-            type: TerrainType.Port,
+          new PortRate({
+            value: 0.38
           }),
         ],
       }),
@@ -137,54 +150,15 @@ export class TileRandomizer {
   }
 
   _extractColorsFromTree(node: SpaceNode): TerrainType[] {
-    const childTypes = [...new Array<TerrainType>()];
+    const childTypes = new Array<TerrainType>();
 
     for(var i = 0; i < node.contains.length; i++) {
       childTypes.push(...this._extractColorsFromTree(node.contains[i]));
     }
 
-    let ownTypesArray = new Array();
-
-    try {
-      ownTypesArray = [...new Array(node.spaces - childTypes.length)];
-    } catch {
-      alert(`
-        Spaces: ${node.spaces}, Childs: ${childTypes.length}\n
-        This is the node:\n
-        ${JSON.stringify(node)}
-      `);
-    }
-
-    const ownTypes = ownTypesArray.map(nothing => node.type);
-
     return node.excludeSelf ?
       childTypes :
-      [...ownTypes, ...childTypes];
-  }
-
-  _getNumOfSpaces(availableSpaces, rate: Rate) {
-    const minMax = this._getMinMax(rate);
-
-    const spaces = this._getRandomValueFromRange(
-      availableSpaces,
-      minMax
-    )
-
-    const availableMin =
-      rate.min !== undefined
-        ? Math.min(rate.min, availableSpaces)
-        : 0;
-
-    return spaces < availableMin ? availableMin : spaces
-  }
-
-  _getMinMax(rate: Rate) {
-    const modifier = rate.value * rate.spread
-
-    const max = rate.value + modifier
-    const min = rate.value - modifier
-
-    return { min, max }
+      [...[...new Array(node.spaces - childTypes.length)].map(() => node.type), ...childTypes];
   }
 
   _getRandomValueFromRange(availableSpaces, { min, max }) {

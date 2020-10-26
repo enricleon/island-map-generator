@@ -19,21 +19,9 @@ function main () {
   const tileRandomizer = new TileRandomizer(GRID_SIZE, true);
   const results = new Array<TerrainType[]>();
 
-  // generator.generateTile(`map-tile-0`, [
-  //   TerrainType.Treasure,
-  //   TerrainType.Water,
-  //   TerrainType.Port,
-  //   TerrainType.Water,
-  //   TerrainType.Port,
-  //   TerrainType.Water,
-  //   TerrainType.Tabern,
-  //   TerrainType.Port,
-  //   TerrainType.Water
-  // ]);
+  results.push([...new Array(9)].map(() => TerrainType.Water));
 
-  // generator.generateTile(`map-tile-0`, [...new Array(9).fill(TerrainType.Water)]);
-
-  for(var i = 0; i < 47; i++) {
+  for(var i = 0; i < 100; i++) {
     results.push(tileRandomizer.getRandomTile());
   }
   
