@@ -3,6 +3,7 @@
 import TERRAIN_COLORS from '../constants/colors';
 import { TerrainType } from '../enums/terrain-type';
 import SelectionHelper from '../helpers/selection-helper';
+import { Tile } from '../models/Tile';
 
 export class TileGenerator {
   private _basePath: string;
@@ -32,7 +33,7 @@ export class TileGenerator {
     this._gapSize = gapSize;
   }
 
-  generateTile(name: string, terrains: TerrainType[]) {
+  generateTile(name: string, tile: Tile) {
     app.documents.add(this._width, this._height, this._ppi, name, NewDocumentMode.RGB);
     const document = app.activeDocument;
 
@@ -43,8 +44,9 @@ export class TileGenerator {
 
     for (var x = 0; x < this._gridSize; x = x + 1) {
       for (var y = 0; y < this._gridSize; y = y + 1) {
-        const tileType = terrains[y * this._gridSize + x];
-        const color = TERRAIN_COLORS[tileType];
+        const position = y * this._gridSize + x;
+
+        const color = tile.getSpaceColor(position);
         // Add a new layer
         document.artLayers.add();
 
@@ -63,10 +65,10 @@ export class TileGenerator {
 
         document.selection.fill(color);
 
-        if(TERRAIN_ASSETS[tileType]) {
+        if(tile.getAsset(position)) {
           this._addBonus(
             document, 
-            TERRAIN_ASSETS[tileType], 
+            tile.getAsset(position), 
             squareSize
           );
         }

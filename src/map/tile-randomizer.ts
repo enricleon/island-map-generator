@@ -1,99 +1,58 @@
-import TERRAIN_COLORS from '../constants/colors';
+import { RATES } from '../constants/rates';
 import { TerrainType } from '../enums/terrain-type';
 import ArrayHelper from '../helpers/array-helper';
 import RandomHelper from '../helpers/random-helper';
-import { PortRate } from '../models/PortRate';
+import { RandomizerConfig } from '../models/RandomizerConfig';
 import { Rate } from '../models/Rate'
 import { SpaceNode } from '../models/SpaceNode';
-
-const CONTENT_TREE = new Rate({
-  value: 1,
-  type: TerrainType.Water,
-  contains: [
-    new Rate({
-    value: 0.31,
-    type: TerrainType.Terrain,
-    min: 1,
-    max: 3,
-    contains: [
-      new Rate({
-        value: 0.62,
-        excludeSelf: true,
-        min: 1,
-        max: 2,
-        type: TerrainType.Bonus,
-        contains: [
-          new Rate({
-            value: 0.62,
-            max: 1,
-            excludeSelf: true,
-            type: TerrainType.TerrainBonus,
-            contains: [
-              new Rate({
-                value: 0.5,
-                type: TerrainType.Tabern,
-                excludeSelf: true,
-                contains: [
-                  new Rate({
-                    value: 0.25,
-                    type: TerrainType.Cocinero,
-                  }),
-                  new Rate({
-                    value: 0.25,
-                    type: TerrainType.Vigia,
-                  }),
-                  new Rate({
-                    value: 0.25,
-                    type: TerrainType.Navegante,
-                  }),
-                  new Rate({
-                    value: 0.25,
-                    type: TerrainType.Artillero,
-                  }),
-                ]
-              }),
-              new Rate({
-                value: 0.5,
-                type: TerrainType.Treasure,
-              })
-            ]
-          }),
-          new PortRate({
-            value: 0.38
-          }),
-        ],
-      }),
-    ],
-  })
-]});
+import { Tile } from '../models/Tile';
+import { TileBalancer } from './tile-balancer';
 
 export class TileRandomizer {
-  private _gridSize: number
-  private _contentTree = CONTENT_TREE;
   private _log: string[];
-  private _logEnabled: boolean;
+  private _gridSize: number;
+  private _logEnabled?: boolean;
 
-  constructor(gridSize, enableLog?) {
-    this._gridSize = gridSize
+  private _balancer: TileBalancer;
+
+  constructor(balancer, config: RandomizerConfig) {
+    this._balancer = balancer;
+
+    this._gridSize = config.gridSize;
+    this._logEnabled = config.logEnabled;
+
     this._log = [];
-    this._logEnabled = enableLog;
   }
 
-  getRandomTile(): TerrainType[] {
-    this._log = [];
-    const totalSpaces = this._gridSize * this._gridSize
-    const result = this._processContentTree(totalSpaces, this._contentTree);
-    const types = this._extractColorsFromTree(result);
+  getRandomTile(): Tile {
+    let tile;
 
-    ArrayHelper.shuffleArray(types);
+    do {
+      tile = new Tile({
+        spaces: this._generateTileSpaces()
+      })
+    }
+    while(!this._balancer.isValid(tile));
 
-    // this._log.push(JSON.stringify(types));
+    this._balancer.addNewTile(tile);
 
     if(this._log.length && this._logEnabled) {
       alert(this._log.join('\n'));
     }
 
-    // return result;
+    return tile;
+  }
+
+  _generateTileSpaces(): TerrainType[] {
+    const result = this._processContentTree(
+      this._gridSize * this._gridSize,
+      RATES
+    );
+
+    const types = this._extractColorsFromTree(result);
+
+    ArrayHelper.shuffleArray(types);
+
     return types;
   }
 
@@ -129,8 +88,6 @@ export class TileRandomizer {
 
       results[randomSpace.type]++;
     }
-
-    // this._log.push(`Space ${i}: ${JSON.stringify(results)}`);
 
     contains = rate.contains.map((child) => {
       const numSpaces = results[child.type];

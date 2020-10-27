@@ -6,6 +6,7 @@ export class Rate {
   public type: TerrainType;
   public min: number;
   public max: number;
+  public balanced: boolean;
   public contains: Rate[];
 
   public constructor(init?:Partial<Rate>) {
