@@ -1,9 +1,6 @@
  /// <reference types="types-for-adobe/Photoshop/2015.5" />
- import TERRAIN_ASSETS from '../constants/assets';
-import TERRAIN_COLORS from '../constants/colors';
-import { TerrainType } from '../enums/terrain-type';
 import SelectionHelper from '../helpers/selection-helper';
-import { Tile } from '../models/Tile';
+import { Tile } from '../models/map/Tile';
 
 export class TileGenerator {
   private _basePath: string;

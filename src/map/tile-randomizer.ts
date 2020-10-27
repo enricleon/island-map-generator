@@ -1,25 +1,27 @@
-import { RATES } from '../constants/rates';
 import { TerrainType } from '../enums/terrain-type';
 import ArrayHelper from '../helpers/array-helper';
 import RandomHelper from '../helpers/random-helper';
-import { RandomizerConfig } from '../models/RandomizerConfig';
-import { Rate } from '../models/Rate'
-import { SpaceNode } from '../models/SpaceNode';
-import { Tile } from '../models/Tile';
+import { RandomizerConfig } from '../models/map/RandomizerConfig';
+import { SpaceNode } from '../models/map/SpaceNode';
+import { TerrainNode } from '../models/map/TerrainNode';
+import { Tile } from '../models/map/Tile';
+import { Rate } from '../models/rates/Rate';
 import { TileBalancer } from './tile-balancer';
 
 export class TileRandomizer {
   private _log: string[];
   private _gridSize: number;
   private _logEnabled?: boolean;
+  private _contentTree: Rate;
 
   private _balancer: TileBalancer;
 
-  constructor(balancer, config: RandomizerConfig) {
+  constructor(config: RandomizerConfig, balancer?) {
     this._balancer = balancer;
 
     this._gridSize = config.gridSize;
     this._logEnabled = config.logEnabled;
+    this._contentTree = config.contentTree;
 
     this._log = [];
   }
@@ -32,9 +34,14 @@ export class TileRandomizer {
         spaces: this._generateTileSpaces()
       })
     }
-    while(!this._balancer.isValid(tile));
+    while(
+      this._balancer !== undefined && 
+      !this._balancer.isValid(tile)
+    );
 
-    this._balancer.addNewTile(tile);
+    if(this._balancer !== undefined) {
+      this._balancer.addNewTile(tile);
+    }
 
     if(this._log.length && this._logEnabled) {
       alert(this._log.join('\n'));
@@ -43,10 +50,10 @@ export class TileRandomizer {
     return tile;
   }
 
-  _generateTileSpaces(): TerrainType[] {
+  _generateTileSpaces(): TerrainNode[] {
     const result = this._processContentTree(
       this._gridSize * this._gridSize,
-      RATES
+      this._contentTree
     );
 
     const types = this._extractColorsFromTree(result);
@@ -99,6 +106,7 @@ export class TileRandomizer {
     });
 
     return new SpaceNode({
+      rate: rate,
       spaces: spaces,
       type: rate.type,
       excludeSelf: rate.excludeSelf,
@@ -106,8 +114,8 @@ export class TileRandomizer {
     });
   }
 
-  _extractColorsFromTree(node: SpaceNode): TerrainType[] {
-    const childTypes = new Array<TerrainType>();
+  _extractColorsFromTree(node: SpaceNode): TerrainNode[] {
+    const childTypes = new Array<TerrainNode>();
 
     for(var i = 0; i < node.contains.length; i++) {
       childTypes.push(...this._extractColorsFromTree(node.contains[i]));
@@ -115,7 +123,12 @@ export class TileRandomizer {
 
     return node.excludeSelf ?
       childTypes :
-      [...[...new Array(node.spaces - childTypes.length)].map(() => node.type), ...childTypes];
+      [...[...new Array(node.spaces - childTypes.length)].map(() => 
+        new TerrainNode({
+          type: node.type,
+          rate: node.rate
+        })
+      ), ...childTypes];
   }
 
   _getRandomValueFromRange(availableSpaces, { min, max }) {

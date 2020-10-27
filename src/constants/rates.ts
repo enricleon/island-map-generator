@@ -1,57 +1,51 @@
-import { TerrainType } from '../enums/terrain-type';
-import { PortRate } from '../models/PortRate';
-import { Rate } from '../models/Rate';
+import { BonusRate } from '../models/rates/BonusRate';
+import { CookTabernRate } from '../models/rates/CookTabernRate';
+import { LookoutTabernRate } from '../models/rates/LookoutTabernRate';
+import { NavigatorTabernRate } from '../models/rates/NavigatorTabernRate';
+import { PortRate } from '../models/rates/PortRate';
+import { TabernRate } from '../models/rates/TabernRate';
+import { TerrainBonusRate } from '../models/rates/TerrainBonusRate';
+import { TerrainRate } from '../models/rates/TerrainRate';
+import { TreasureRate } from '../models/rates/TreasureRate';
+import { WarriorTabernRate } from '../models/rates/WarriorTabernRate';
+import { WaterRate } from '../models/rates/WaterRate';
 
-export const RATES = new Rate({
+export const RATES = new WaterRate({
   value: 1,
-  type: TerrainType.Water,
   contains: [
-    new Rate({
+    new TerrainRate({
     value: 0.31,
-    type: TerrainType.Terrain,
     min: 1,
     max: 3,
     contains: [
-      new Rate({
+      new BonusRate({
         value: 0.62,
-        excludeSelf: true,
         min: 1,
         max: 2,
-        type: TerrainType.Bonus,
         contains: [
-          new Rate({
+          new TerrainBonusRate({
             value: 0.62,
             max: 1,
-            excludeSelf: true,
-            type: TerrainType.TerrainBonus,
             contains: [
-              new Rate({
+              new TabernRate({
                 value: 0.5,
-                type: TerrainType.Tabern,
-                excludeSelf: true,
-                balanced: true,
                 contains: [
-                  new Rate({
-                    value: 0.25,
-                    type: TerrainType.Cocinero
+                  new CookTabernRate({
+                    value: 0.25
                   }),
-                  new Rate({
-                    value: 0.25,
-                    type: TerrainType.Vigia,
+                  new WarriorTabernRate({
+                    value: 0.25
                   }),
-                  new Rate({
-                    value: 0.25,
-                    type: TerrainType.Navegante,
+                  new NavigatorTabernRate({
+                    value: 0.25
                   }),
-                  new Rate({
-                    value: 0.25,
-                    type: TerrainType.Artillero,
+                  new LookoutTabernRate({
+                    value: 0.25
                   }),
                 ]
               }),
-              new Rate({
-                value: 0.5,
-                type: TerrainType.Treasure,
+              new TreasureRate({
+                value: 0.5
               })
             ]
           }),

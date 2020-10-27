@@ -1,5 +1,5 @@
-import { TerrainType } from '../enums/terrain-type';
-import { Tile } from '../models/Tile';
+import { RATES } from '../constants/rates';
+import { WaterRate } from '../models/rates/WaterRate';
 import { TileBalancer } from './tile-balancer';
 import { TileGenerator } from './tile-generator';
 import { TileRandomizer } from './tile-randomizer';
@@ -27,10 +27,11 @@ export class MapGenerator {
 
   generateMap(numTiles: number) {
     const tileBalancer = new TileBalancer();
-    const tileRandomizer = new TileRandomizer(tileBalancer, {
+    const tileRandomizer = new TileRandomizer({
       gridSize: this._gridSize,
-      logEnabled: true
-    });
+      logEnabled: true,
+      contentTree: RATES
+    }, tileBalancer);
 
     const results = [this._getInitialTile(this._gridSize)];
   
@@ -44,8 +45,15 @@ export class MapGenerator {
   }
 
   private _getInitialTile(gridSize) {
-    return new Tile({
-      spaces: [...new Array(gridSize * gridSize)].map(() => TerrainType.Water)
+    const tileRandomizer = new TileRandomizer({
+      gridSize: gridSize,
+      logEnabled: false,
+      contentTree: new WaterRate({
+        value: 1,
+        min: 9
+      })
     });
+
+    return tileRandomizer.getRandomTile();
   }
 }

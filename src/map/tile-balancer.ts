@@ -1,4 +1,4 @@
-import { Tile } from '../models/Tile';
+import { Tile } from '../models/map/Tile';
 
 export class TileBalancer {
   private tiles: Tile[];
