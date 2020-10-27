@@ -42,12 +42,6 @@ export class TileRandomizer {
       alert(this._log.join('\n'));
     }
 
-    // this._log.push(JSON.stringify(types));
-
-    if(this._log.length && this._logEnabled) {
-      alert(this._log.join('\n'));
-    }
-
     return tile;
   }
 
