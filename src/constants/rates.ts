@@ -14,12 +14,12 @@ export const RATES = new WaterRate({
   value: 1,
   contains: [
     new TerrainRate({
-    value: 0.31,
+    value: 0.28,
     min: 1,
-    max: 3,
+    max: 4,
     contains: [
       new BonusRate({
-        value: 0.62,
+        value: 0.5,
         min: 1,
         max: 2,
         contains: [
