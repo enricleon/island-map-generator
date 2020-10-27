@@ -14,7 +14,7 @@
   },
   "scripts": {
     "dev": "npm-watch",
-    "build": "webpack && npm run build:extendscript",
+    "build": "webpack && npm run build:extendscript && npm run clean",
     "build:watch": "webpack --watch",
     "build:extendscript": "extendscriptr --script dist/island-tile-generator.js --output dist/island-tile-generator.jsx --target Photoshop --targetengine main",
     "clean": "rimraf dist/island-tile-generator.js",
