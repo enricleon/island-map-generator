@@ -22,12 +22,11 @@ export class TileRandomizer {
     this._gridSize = config.gridSize;
     this._logEnabled = config.logEnabled;
     this._contentTree = config.contentTree;
-
-    this._log = [];
   }
 
   getRandomTile(): Tile {
     let tile;
+    this._log = [];
 
     do {
       tile = new Tile({

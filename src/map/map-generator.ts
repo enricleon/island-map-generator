@@ -29,7 +29,7 @@ export class MapGenerator {
     const tileBalancer = new TileBalancer();
     const tileRandomizer = new TileRandomizer({
       gridSize: this._gridSize,
-      logEnabled: true,
+      logEnabled: false,
       contentTree: RATES
     }, tileBalancer);
 
