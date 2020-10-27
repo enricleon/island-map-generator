@@ -31,8 +31,11 @@ export class TileBalancer {
       var maxTaberns = Math.max(...values);
       var currentTabernCount = this.tabernCount[tabernRate.type];
 
+      var allEqual = values.every((val, i, arr) => val === arr[0]);
+
       if(
-        currentTabernCount < maxTaberns || 
+        (currentTabernCount < maxTaberns) || 
+        allEqual || 
         currentTabernCount === undefined
       ) {
         this.tabernCount[tabernRate.type] = currentTabernCount !== undefined ? currentTabernCount + 1 : 0;
