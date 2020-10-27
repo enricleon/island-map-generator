@@ -35,7 +35,7 @@ export class MapGenerator {
 
     const results = [this._getInitialTile(this._gridSize)];
   
-    for(var i = 0; i < numTiles; i++) {
+    for(var i = 0; i < numTiles - 1; i++) {
       results.push(tileRandomizer.getRandomTile());
     }
     

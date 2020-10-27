@@ -9,7 +9,6 @@ export class PortRate extends Rate implements PhysicalRate {
     super(init);
 
     this.type = TerrainType.Port;
-    this.excludeSelf = true;
   }
 
   getAsset() {

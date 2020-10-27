@@ -36,12 +36,14 @@ export class TileRandomizer {
     }
     while(
       this._balancer !== undefined && 
-      !this._balancer.isValid(tile)
+      !this._balancer.safeAddNewTile(tile)
     );
 
-    if(this._balancer !== undefined) {
-      this._balancer.addNewTile(tile);
+    if(this._log.length && this._logEnabled) {
+      alert(this._log.join('\n'));
     }
+
+    // this._log.push(JSON.stringify(types));
 
     if(this._log.length && this._logEnabled) {
       alert(this._log.join('\n'));
@@ -64,6 +66,8 @@ export class TileRandomizer {
   }
 
   _processContentTree(spaces, rate: Rate): SpaceNode {
+    this._log.push(`Spaces: ${TerrainType[rate.type]}: ${spaces}`);
+
     let contains = new Array<SpaceNode>();
     const ratesIncluded = rate.excludeSelf ? rate.contains : 
       [rate, ...rate.contains];

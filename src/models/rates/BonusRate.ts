@@ -6,6 +6,6 @@ export class BonusRate extends Rate {
     super(init);
 
     this.excludeSelf = true;
-    this.type = TerrainType.Terrain;
+    this.type = TerrainType.Bonus;
   }
 }

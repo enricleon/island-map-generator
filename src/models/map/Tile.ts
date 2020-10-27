@@ -1,5 +1,5 @@
-import TERRAIN_ASSETS from '../../constants/assets';
-import TERRAIN_COLORS from '../../constants/colors';
+import { TerrainType } from '../../enums/terrain-type';
+import { Rate } from '../rates/Rate';
 import { TerrainNode } from './TerrainNode';
 
 export class Tile {
@@ -12,11 +12,27 @@ export class Tile {
   }
 
   getSpaceColor(index): RGBColor {
-    return this.spaces[index]
-      .getColor();
+    return this.spaces[index].getColor();
   }
 
   getAsset(index) {
     return this.spaces[index].getAsset();
+  }
+
+  findTabern(): Rate | undefined {
+    let i: number, len = this.spaces.length;
+
+    for(i = 0; i < len; i++) {
+      switch(this.spaces[i].type) {
+        case TerrainType.Cocinero:
+        case TerrainType.Navegante:
+        case TerrainType.Artillero:
+        case TerrainType.Vigia:
+          return this.spaces[i].rate;
+        default: {
+          return undefined;
+        }
+      }
+    }
   }
 }

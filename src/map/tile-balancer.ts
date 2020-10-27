@@ -2,17 +2,47 @@ import { Tile } from '../models/map/Tile';
 
 export class TileBalancer {
   private tiles: Tile[];
+  private tabernCount: any;
 
   constructor (
   ) {
     this.tiles = [];
+    this.tabernCount = {};
   }
 
-  addNewTile(tile: Tile) {
-    this.tiles.push(tile);
+  safeAddNewTile(tile: Tile) {
+    const checkResult = this._checkTaberns(tile);
+    
+    if(checkResult) {
+      this.tiles.push(tile);
+    }
+
+    return checkResult;
   }
 
-  isValid(tile: Tile) {
+  private _checkTaberns(tile: Tile): boolean {
+    const tabernRate = tile.findTabern();
+
+    if(tabernRate !== undefined) {
+      const values = Object.keys(this.tabernCount).map(index => {
+        return this.tabernCount[index];
+      })
+  
+      var maxTaberns = Math.max(...values);
+      var currentTabernCount = this.tabernCount[tabernRate.type];
+
+      if(
+        currentTabernCount < maxTaberns || 
+        currentTabernCount === undefined
+      ) {
+        this.tabernCount[tabernRate.type] = currentTabernCount !== undefined ? currentTabernCount + 1 : 0;
+        
+        return true;
+      }
+  
+      return false;
+    }
+
     return true;
   }
 }
