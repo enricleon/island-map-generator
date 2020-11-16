@@ -9,6 +9,7 @@ export class TileGenerator {
   private _ppi: number;
   private _gridSize: number;
   private _gapSize: number;
+  private _savePsd: boolean;
 
   constructor (options) {
     this._init(options);
@@ -19,7 +20,8 @@ export class TileGenerator {
     height,
     gridSize,
     gapSize,
-    ppi
+    ppi,
+    savePsd
   }) {
     this._basePath = (new File($.fileName)).path;
 
@@ -28,6 +30,7 @@ export class TileGenerator {
     this._ppi = ppi;
     this._gridSize = gridSize;
     this._gapSize = gapSize;
+    this._savePsd = savePsd;
   }
 
   generateTile(name: string, tile: Tile) {
@@ -73,6 +76,12 @@ export class TileGenerator {
     }
 
     // Saving the file
+
+    if(this._savePsd) {
+      const saveFile = new File(`${this._basePath}/${name}.psd`);
+      const psdSaveOptions = new PhotoshopSaveOptions();
+      document.saveAs(saveFile, psdSaveOptions, true, Extension.LOWERCASE);
+    }
 
     this._saveAndClose(document, `${this._basePath}/${name}.jpg`)
   }

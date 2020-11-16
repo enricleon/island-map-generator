@@ -8,10 +8,11 @@ function main () {
     height: 710,
     ppi: 300,
     gridSize: 3,
-    gapSize: 1
+    gapSize: 1,
+    savePsd: true
   });
 
-  mapGenerator.generateMap(50);
+  mapGenerator.generateMap(10);
 }
 
 main();

@@ -1,4 +1,6 @@
+import { TerrainType } from '../enums/terrain-type';
 import { Tile } from '../models/map/Tile';
+import { TabernRate } from '../models/rates/TabernRate';
 
 export class TileBalancer {
   private tiles: Tile[];
@@ -26,7 +28,7 @@ export class TileBalancer {
     if(tabernRate !== undefined) {
       const values = Object.keys(this.tabernCount).map(index => {
         return this.tabernCount[index];
-      })
+      });
   
       var maxTaberns = Math.max(...values);
       var currentTabernCount = this.tabernCount[tabernRate.type];
@@ -34,8 +36,8 @@ export class TileBalancer {
       var allEqual = values.every((val, i, arr) => val === arr[0]);
 
       if(
-        (currentTabernCount < maxTaberns) || 
-        allEqual || 
+        (!allEqual && currentTabernCount < maxTaberns ||
+        allEqual) ||  
         currentTabernCount === undefined
       ) {
         this.tabernCount[tabernRate.type] = currentTabernCount !== undefined ? currentTabernCount + 1 : 0;

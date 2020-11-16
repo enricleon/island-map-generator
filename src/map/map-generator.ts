@@ -13,7 +13,8 @@ export class MapGenerator {
     height,
     ppi,
     gridSize,
-    gapSize
+    gapSize,
+    savePsd
   }) {
     this._gridSize = gridSize;
     this._tileGenerator = new TileGenerator({
@@ -21,7 +22,8 @@ export class MapGenerator {
       height: height,
       ppi: ppi,
       gridSize: gridSize,
-      gapSize: gapSize
+      gapSize: gapSize,
+      savePsd: savePsd
     });
   }
 
