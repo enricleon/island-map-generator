@@ -9,6 +9,7 @@ import { TerrainRate } from '../models/rates/TerrainRate';
 import { TreasureRate } from '../models/rates/TreasureRate';
 import { WarriorTabernRate } from '../models/rates/WarriorTabernRate';
 import { WaterRate } from '../models/rates/WaterRate';
+import { WindRate } from '../models/rates/WindRate';
 
 export const RATES = new WaterRate({
   value: 1,
@@ -16,7 +17,7 @@ export const RATES = new WaterRate({
     new TerrainRate({
     value: 0.28,
     min: 1,
-    max: 4,
+    max: 3,
     contains: [
       new BonusRate({
         value: 0.5,
@@ -31,17 +32,17 @@ export const RATES = new WaterRate({
                 value: 0.5,
                 contains: [
                   new CookTabernRate({
-                    value: 0.25
+                    value: 0.33
                   }),
                   new WarriorTabernRate({
-                    value: 0.25
+                    value: 0.33
                   }),
                   new NavigatorTabernRate({
-                    value: 0.25
+                    value: 0.33
                   }),
-                  new LookoutTabernRate({
-                    value: 0.25
-                  }),
+                  // new LookoutTabernRate({
+                  //   value: 0.25
+                  // }),
                 ]
               }),
               new TreasureRate({
@@ -50,7 +51,10 @@ export const RATES = new WaterRate({
             ]
           }),
           new PortRate({
-            value: 0.38
+            value: 0.23
+          }),
+          new WindRate({
+            value: 0.15
           }),
         ],
       }),

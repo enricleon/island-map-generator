@@ -11,5 +11,6 @@ export enum TerrainType {
   Cocinero,
   Vigia,
   Navegante,
-  Artillero
+  Artillero,
+  Wind
 }
