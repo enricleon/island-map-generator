@@ -82,19 +82,15 @@ export class TileGenerator {
 
     const assetDocument = app.open(file);
     const assetWidth = (assetDocument.width as UnitValue).value;
-    const widthRelation = (squareSize * 0.8 * 100) / assetWidth;
+    const widthRelation = (squareSize * 1 * 100) / assetWidth;
     
-    assetDocument.selection.selectAll();
-    assetDocument.selection.copy();
-    const assetLayer = assetDocument.paste(true);
-
-    assetLayer.resize(widthRelation, widthRelation, AnchorPosition.MIDDLECENTER);
     assetDocument.selection.selectAll();
     assetDocument.selection.copy();
     assetDocument.close(SaveOptions.DONOTSAVECHANGES);
 
     app.activeDocument = document;
-    app.activeDocument.paste(true);
+    var assetLayer = app.activeDocument.paste(true);
+    assetLayer.resize(widthRelation, widthRelation, AnchorPosition.MIDDLECENTER);
   }
 
   _saveAndClose(document, saveFile, jpegQuality = 7) {

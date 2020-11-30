@@ -19,27 +19,24 @@ export class Tile {
     return this.spaces[index].getAsset();
   }
 
-  findTabern(): Rate | undefined {
-    let targetTabern;
+  hasCellOfType(type: TerrainType): boolean {
+    let targetCell;
 
     let i: number, len = this.spaces.length;
 
     for(i = 0; i < len; i++) {
-      if(targetTabern) {
+      if(targetCell) {
         continue;
       }
 
       switch(this.spaces[i].type) {
-        case TerrainType.Cocinero:
-        case TerrainType.Navegante:
-        case TerrainType.Artillero:
-        case TerrainType.Vigia: {
-          targetTabern = this.spaces[i].rate;
+        case type: {
+          targetCell = this.spaces[i];
           break;
         }
       }
     }
 
-    return targetTabern;
+    return !!targetCell;
   }
 }

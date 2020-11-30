@@ -1,5 +1,9 @@
 import { RATES } from '../constants/rates';
+import { TerrainType } from '../enums/terrain-type';
+import { TerrainNode } from '../models/map/TerrainNode';
+import { Tile } from '../models/map/Tile';
 import { WaterRate } from '../models/rates/WaterRate';
+import { WindRate } from '../models/rates/WindRate';
 import { TileBalancer } from './tile-balancer';
 import { TileGenerator } from './tile-generator';
 import { TileRandomizer } from './tile-randomizer';
@@ -26,7 +30,7 @@ export class MapGenerator {
   }
 
   generateMap(numTiles: number) {
-    const tileBalancer = new TileBalancer();
+    const tileBalancer = new TileBalancer(false);
     const tileRandomizer = new TileRandomizer({
       gridSize: this._gridSize,
       logEnabled: false,
@@ -45,15 +49,28 @@ export class MapGenerator {
   }
 
   private _getInitialTile(gridSize) {
-    const tileRandomizer = new TileRandomizer({
-      gridSize: gridSize,
-      logEnabled: false,
-      contentTree: new WaterRate({
-        value: 1,
-        min: 9
-      })
-    });
+    const spaces:TerrainNode[] = [];
 
-    return tileRandomizer.getRandomTile();
+    const totalCells = gridSize * gridSize;
+
+    for(let i = 0; i < totalCells; i++) {
+      const terrain = new TerrainNode({
+        type: TerrainType.Water,
+        rate: new WaterRate({})
+      });
+
+      if(i === Math.floor(totalCells / 2)) {
+        const wind = new TerrainNode({
+          type: TerrainType.Water,
+          rate: new WindRate({})
+        });
+
+        spaces.push(wind);
+      } else {
+        spaces.push(terrain);
+      }
+    }
+
+    return new Tile({ spaces });
   }
 }

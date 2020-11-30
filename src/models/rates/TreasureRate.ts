@@ -4,18 +4,12 @@ import { TerrainType } from '../../enums/terrain-type';
 import { PhysicalRate } from './interfaces/PhysicalRate';
 import { Rate } from './Rate';
 
-export class TreasureRate extends Rate implements PhysicalRate {
+export class TreasureRate extends Rate  {
   public constructor(init?:Partial<TreasureRate>) {
     super(init);
 
+    this.excludeSelf = true;
     this.type = TerrainType.Treasure;
-  }
-
-  getAsset() {
-    return 'treasure.png';
-  }
-
-  getColor() {
-    return TERRAIN_COLORS[ColorType.Terrain];
+    this.balanced = true;
   }
 }
