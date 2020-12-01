@@ -13,6 +13,7 @@
     }
   },
   "scripts": {
+    "start": "ts-node src/main.ts",
     "dev": "npm-watch",
     "build": "webpack && npm run build:extendscript && npm run clean",
     "build:watch": "webpack --watch",
