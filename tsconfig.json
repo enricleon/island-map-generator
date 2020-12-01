@@ -19,7 +19,8 @@
     "target": "esnext",
     "lib": [
       "esnext",
-      "ScriptHost"
+      "ScriptHost",
+      "DOM"
     ],
     "types": [
       // "./node_modules/photoshop.d.ts/dist/cc",

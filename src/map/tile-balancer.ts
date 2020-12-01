@@ -1,115 +1,121 @@
 import { Tile } from '../models/map/Tile';
 import { RATES } from '../constants/rates';
 import { Rate } from '../models/rates/Rate';
-import { TerrainType } from '../enums/terrain-type';
 
 export class TileBalancer {
-  private tiles: Tile[];
-  private balancedRates: any;
-  private _log: string[];
-  private _logEnabled: boolean;
+  private _numPlayers: number;
+  private _tiles: Tile[];
+  private _balancedRates: any;
 
   constructor (
-    logEnabled = false
+    numPlayers = 6
   ) {
-    this._logEnabled = logEnabled;
-    this.tiles = [];
-    this.balancedRates = {};
-
-    this.resetLog();
+    this._numPlayers = numPlayers;
+    this._tiles = [];
+    this._balancedRates = {};
   }
 
-  resetLog() {
-    this._log = [];
+  hasPendingTiles() {
+    const contentTree = RATES;
+    const checkResult = !this._processRate(contentTree, (rate) => {
+      return this._checkRateCompleted(rate);
+    });
+
+    return checkResult;
   }
 
   safeAddNewTile(tile: Tile) {
     const contentTree = RATES;
-
-    this.resetLog();
-    this._log.push('[');
-    for(let i = 0; i < tile.spaces.length; i++) {
-      this._log.push(`    ${TerrainType[tile.spaces[i].type]}`);
-    }
-    this._log.push(']');
-
-    const checkResult = this._processNode(tile, contentTree);
-    this._log.push(`Balanced: ${checkResult}`);
+    const checkResult = this._processRate(contentTree, (rate) => {
+      return this._checkBalance(tile, rate) && 
+            this._checkTileRateNotValid(tile, rate);
+    });
 
     if(checkResult) {
-      this.tiles.push(tile);
-    }
-
-    if(this._log.length) {
-      if(this._logEnabled) {
-        alert(this._log.join('\n'));
-      }
+      this._tiles.push(tile);
     }
 
     return checkResult;
   }
 
-  private _printNode(result) {
-
-  } 
-
-  private _processNode(tile, rate) {
-    let result = this._checkBalance(tile, rate);
+  private _processRate(rate, callback) {
+    let result = callback(rate);
 
     if(result && rate.contains) {
       for(let i = 0; i < rate.contains.length; i++) {
-        result = result && this._processNode(tile, rate.contains[i]);
+        result = result && this._processRate(rate.contains[i], callback);
       }
     }
     
     return result;
   }
 
+  private _checkTileRateNotValid(tile, rate) {
+    const isRateCompleted = this._checkRateIsCompleted(rate);
+
+    if(isRateCompleted && tile.hasCellOfType(rate.type)) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private _checkRateIsCompleted(rate: Rate) {
+    if(rate.playerCount) {
+      const count = rate.playerCount(this._numPlayers);
+      const cellsOfType = this._tiles.reduce((sum, tile) => sum + tile.countCellsOfType(rate.type), 0);
+
+      if(cellsOfType === count) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private _checkRateCompleted(rate: Rate) {
+    if(rate.playerCount) {
+      const count = rate.playerCount(this._numPlayers);
+      const cellsOfType = this._tiles.reduce((sum, tile) => sum + tile.countCellsOfType(rate.type), 0);
+
+      if(cellsOfType < count) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   private _checkBalance(tile: Tile, rate: Rate): boolean {
     let result = true;
 
     if(rate.balanced) {
-      this._log.push(`Rate: ${TerrainType[rate.type]}`);
-      this.balancedRates[rate.type] = this.balancedRates[rate.type] || {};
-
-      this._log.push(`    Initial value: ${JSON.stringify(this.balancedRates[rate.type])}`);
+      this._balancedRates[rate.type] = this._balancedRates[rate.type] || {};
 
       for(let i = 0; i < rate.contains.length; i++) {
         const childRate = rate.contains[i];
-        this._log.push(`    Child Rate: ${TerrainType[childRate.type]}`);
-
         const hasCell = tile.hasCellOfType(childRate.type);
-        this._log.push(`    Tile has cell: ${childRate.type}?`);
 
         if(hasCell) {
-          this._log.push(`        Yes!`);
-          const values = Object.keys(this.balancedRates[rate.type]).map(index => {
-            return this.balancedRates[rate.type][index];
+          const values = Object.keys(this._balancedRates[rate.type]).map(index => {
+            return this._balancedRates[rate.type][index];
           })
 
-          this._log.push(`        Initial value: ${JSON.stringify(values)}`);
-
           var maxCellsOfRate = values.length ? Math.max(...values) : 1;
-          var currentCount = this.balancedRates[rate.type][childRate.type] || 0;
+          var currentCount = this._balancedRates[rate.type][childRate.type] || 0;
     
-          const firstBonusCount = this.balancedRates[rate.type][Object.keys(this.balancedRates[rate.type])[0]];
-          var allEqual = rate.contains.every(child => this.balancedRates[rate.type][child.type] === firstBonusCount);
-    
-          this._log.push(`        Max cells of rate: ${maxCellsOfRate}`);
-          this._log.push(`        Current count: ${currentCount}`);
-          this._log.push(`        All equal: ${allEqual}`);
+          const firstBonusCount = this._balancedRates[rate.type][Object.keys(this._balancedRates[rate.type])[0]];
+          var allEqual = rate.contains.every(child => this._balancedRates[rate.type][child.type] === firstBonusCount);
 
           if(
             (currentCount < maxCellsOfRate) || 
             allEqual || 
             currentCount === undefined
           ) {
-            this.balancedRates[rate.type][childRate.type] = currentCount !== undefined ? currentCount + 1 : 1;
+            this._balancedRates[rate.type][childRate.type] = currentCount !== undefined ? currentCount + 1 : 1;
           } else {
             result = false;
           }
-        } else {
-          this._log.push(`        No`);
         }
       }
     }

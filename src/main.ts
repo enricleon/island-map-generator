@@ -11,7 +11,7 @@ function main () {
     gapSize: 1
   });
 
-  mapGenerator.generateMap(50);
+  mapGenerator.generateMap(6);
 }
 
 main();

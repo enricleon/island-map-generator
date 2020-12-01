@@ -11,6 +11,7 @@ export class Rate implements PhysicalRate {
   public max: number;
   public balanced: boolean;
   public contains: Rate[];
+  public playerCount: any;
 
   public constructor(init?:Partial<Rate>) {
     this.contains = new Array<Rate>();

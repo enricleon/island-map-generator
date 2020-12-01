@@ -20,23 +20,24 @@ export class Tile {
   }
 
   hasCellOfType(type: TerrainType): boolean {
-    let targetCell;
+    return this.countCellsOfType(type) > 0;
+  }
+
+  countCellsOfType(type: TerrainType) {
+    let count = 0;
 
     let i: number, len = this.spaces.length;
 
     for(i = 0; i < len; i++) {
-      if(targetCell) {
-        continue;
-      }
-
-      switch(this.spaces[i].type) {
-        case type: {
-          targetCell = this.spaces[i];
-          break;
-        }
+      if(this.spaces[i].type === type) {
+        count++;
       }
     }
 
-    return !!targetCell;
+    return count;
+  }
+
+  toString() {
+    return `[${this.spaces.map(space => TerrainType[space.type]).join(",\n")}]`;
   }
 }
