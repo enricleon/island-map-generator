@@ -1,5 +1,5 @@
 import { ColorType } from '../enums/color-type';
-import { RGBColor } from '../models/RGBColor';
+// import { RGBColor } from '../models/RGBColor';
 
 var terrain = new RGBColor();
 terrain.red = 249;

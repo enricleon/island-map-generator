@@ -3,6 +3,7 @@ import { Rate } from '../rates/Rate';
 import { TerrainNode } from './TerrainNode';
 
 export class Tile {
+  name: string;
   spaces: TerrainNode[];
 
   constructor(init?:Partial<Tile>) {

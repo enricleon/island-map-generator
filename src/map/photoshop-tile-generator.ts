@@ -1,8 +1,9 @@
  /// <reference types="types-for-adobe/Photoshop/2015.5" />
 import SelectionHelper from '../helpers/selection-helper';
 import { Tile } from '../models/map/Tile';
+import { TileGenerator } from './interfaces/tile-generator';
 
-export class TileGenerator {
+export class PhotoshopTileGenerator implements TileGenerator {
   private _basePath: string;
   private _height: number;
   private _width: number;
@@ -30,7 +31,7 @@ export class TileGenerator {
     this._gapSize = gapSize;
   }
 
-  generateTile(name: string, tile: Tile) {
+  generateTile(tile: Tile) {
     app.documents.add(this._width, this._height, this._ppi, name, NewDocumentMode.RGB);
     const document = app.activeDocument;
 
@@ -74,7 +75,7 @@ export class TileGenerator {
 
     // Saving the file
 
-    this._saveAndClose(document, `${this._basePath}/${name}.jpg`)
+    this._saveAndClose(document, `${this._basePath}/${tile.name}.jpg`)
   }
 
   _addBonus(document, fileName, squareSize) {
