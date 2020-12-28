@@ -1,10 +1,8 @@
 import { Tile } from '../models/map/Tile';
 import { TileGenerator } from './interfaces/tile-generator';
 
-import * as XLSX from 'xlsx';
 import * as fs from 'fs';
 import * as path from 'path';
-
 export class ExcelTileGenerator implements TileGenerator {
   public filename: string;
 
