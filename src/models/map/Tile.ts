@@ -1,5 +1,4 @@
 import { TerrainType } from '../../enums/terrain-type';
-import { Rate } from '../rates/Rate';
 import { TerrainNode } from './TerrainNode';
 
 export class Tile {
@@ -12,7 +11,7 @@ export class Tile {
     Object.assign(this, init);
   }
 
-  getSpaceColor(index): RGBColor {
+  getSpaceColor(index): any {
     return this.spaces[index].getColor();
   }
 

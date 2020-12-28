@@ -7,8 +7,8 @@ import { WindRate } from '../models/rates/WindRate';
 import { TileBalancer } from './tile-balancer';
 import { TileRandomizer } from './tile-randomizer';
 import { TileGenerator } from './interfaces/tile-generator';
-import { PhotoshopTileGenerator } from './photoshop-tile-generator';
-// import { ExcelTileGenerator } from './excel-tile-generator';
+// import { PhotoshopTileGenerator } from './photoshop-tile-generator';
+import { ExcelTileGenerator } from './excel-tile-generator';
 
 export class MapGenerator {
   // private _tileGenerator: TileGenerator;
@@ -23,16 +23,16 @@ export class MapGenerator {
     gapSize
   }) {
     this._gridSize = gridSize;
-    // this._generator = new ExcelTileGenerator({
-    //   filename: ''
-    // });
-    this._generator = new PhotoshopTileGenerator({
-      width: width,
-      height: height,
-      ppi: ppi,
-      gridSize: gridSize,
-      gapSize: gapSize
+    this._generator = new ExcelTileGenerator({
+      filename: ''
     });
+    // this._generator = new PhotoshopTileGenerator({
+    //   width: width,
+    //   height: height,
+    //   ppi: ppi,
+    //   gridSize: gridSize,
+    //   gapSize: gapSize
+    // });
   }
 
   generateMap(numPlayers?: number) {

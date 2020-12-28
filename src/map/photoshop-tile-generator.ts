@@ -44,7 +44,7 @@ export class PhotoshopTileGenerator implements TileGenerator {
       for (var y = 0; y < this._gridSize; y = y + 1) {
         const position = y * this._gridSize + x;
 
-        const color = tile.getSpaceColor(position);
+        const color = Object.assign(new RGBColor(), tile.getSpaceColor(position));
         // Add a new layer
         document.artLayers.add();
 

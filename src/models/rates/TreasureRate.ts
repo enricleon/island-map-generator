@@ -1,7 +1,4 @@
-import TERRAIN_COLORS from '../../constants/colors';
-import { ColorType } from '../../enums/color-type';
 import { TerrainType } from '../../enums/terrain-type';
-import { PhysicalRate } from './interfaces/PhysicalRate';
 import { Rate } from './Rate';
 
 export class TreasureRate extends Rate  {
